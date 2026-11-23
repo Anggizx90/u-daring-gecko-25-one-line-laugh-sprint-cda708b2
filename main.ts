@@ -14,5 +14,19 @@ import { mkdirSync, writeFileSync } from "node:fs";
 const LINE =
   "The chair in my bedroom got promoted to closet last year, and honestly, it never even applied.";
 
-mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", LINE, "utf8");
+// Guard: the entry must be exactly one non-empty line, and it must fit the
+// competition's length limit, so a bad line fails loudly instead of being
+// silently written out.
+const trimmed = LINE.trim();
+if (trimmed.length === 0) {
+  throw new Error("entry line must not be empty");
+}
+if (trimmed.length > 200) {
+  throw new Error(
+    `entry line is ${trimmed.length} characters, over the 200-character limit`,
+  );
+}
+
+const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+mkdirSync(outputDir, { recursive: true });
+writeFileSync(`${outputDir}/entry.txt`, LINE, "utf8");
